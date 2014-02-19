@@ -37,13 +37,13 @@ public class MainActivity extends Activity {
 	private void setupEqualizerAndUI(){
 		//Create and attach a new Equalizer to the global audio stream
 		equaliz = new Equalizer(0,0);
-		/*equaliz.setEnabled(true);
+		equaliz.setEnabled(true);
 		
 		
 		TextView eqTextView = new TextView(this);
         eqTextView.setText("Equalizer:");
         mLinearLayout.addView(eqTextView);
-/*
+
         short bands = equaliz.getNumberOfBands();      
         final short minEQLevel = equaliz.getBandLevelRange()[0];
         final short maxEQLevel = equaliz.getBandLevelRange()[1];
@@ -103,7 +103,7 @@ public class MainActivity extends Activity {
             row.addView(maxDbTextView);
 
             mLinearLayout.addView(row);
-        }*/
+        }
         
 	}
 
