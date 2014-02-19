@@ -4,10 +4,14 @@ import android.media.audiofx.Equalizer;
 import android.os.Bundle;
 import android.app.Activity;
 import android.view.Menu;
+<<<<<<< HEAD
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.view.*;
 import android.widget.LinearLayout;
+=======
+import android.view.View;
+>>>>>>> d0ed86330c62be5c3ea116ab8dc99da8c39a0aaf
 
 public class MainActivity extends Activity {
 
@@ -34,6 +38,7 @@ public class MainActivity extends Activity {
 		return true;
 	}
 	
+<<<<<<< HEAD
 	private void setupEqualizerAndUI(){
 		//Create and attach a new Equalizer to the global audio stream
 		equaliz = new Equalizer(0,0);
@@ -107,5 +112,18 @@ public class MainActivity extends Activity {
         
 	}
 
+=======
+	public void openConfigPage(View v){
+		setContentView(R.layout.configuration);
+	}
+	
+	public void openSavePage(View v){
+		setContentView(R.layout.saves);
+	}
+	
+	public void openTutorialPage(View v){
+		setContentView(R.layout.tutorial);
+	}
+>>>>>>> d0ed86330c62be5c3ea116ab8dc99da8c39a0aaf
 
 }

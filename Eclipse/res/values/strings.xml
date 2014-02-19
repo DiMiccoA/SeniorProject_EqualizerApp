@@ -4,5 +4,8 @@
     <string name="app_name">EqualizerApp</string>
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
+    <string name="configure_page">Configure</string>
+    <string name="save_page">Saves</string>
+    <string name="tutorial_page">Tutorial</string>
 
 </resources>
