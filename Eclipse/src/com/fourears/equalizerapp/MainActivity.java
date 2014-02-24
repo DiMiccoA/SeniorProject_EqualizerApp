@@ -20,12 +20,12 @@ public class MainActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
-		mLinearLayout = new LinearLayout(this);
-        mLinearLayout.setOrientation(LinearLayout.VERTICAL);
+		//mLinearLayout = new LinearLayout(this);
+        //mLinearLayout.setOrientation(LinearLayout.VERTICAL);
 
-        setContentView(mLinearLayout);
-		//setContentView(R.layout.activity_main);
-		setupEqualizerAndUI();
+        //setContentView(mLinearLayout);
+		setContentView(R.layout.activity_main);
+		//setupEqualizerAndUI();
 	}
 
 	@Override
@@ -109,7 +109,10 @@ public class MainActivity extends Activity {
 	}
 
 	public void openConfigPage(View v){
-		setContentView(R.layout.configuration);
+		mLinearLayout = new LinearLayout(this);
+        mLinearLayout.setOrientation(LinearLayout.VERTICAL);
+		setContentView(mLinearLayout);
+		setupEqualizerAndUI();
 	}
 	
 	public void openSavePage(View v){
