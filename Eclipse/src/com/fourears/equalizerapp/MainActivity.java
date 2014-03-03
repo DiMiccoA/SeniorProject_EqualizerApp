@@ -105,6 +105,12 @@ public class MainActivity extends Activity {
 
             mLinearLayout.addView(row);
         }
+        /*Trying to create a button*/
+        LinearLayout row = new LinearLayout(this);
+        row.setOrientation(LinearLayout.HORIZONTAL);
+        
+        mLinearLayout.addView(row);
+        
         
 	}
 
