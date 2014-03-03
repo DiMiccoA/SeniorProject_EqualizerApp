@@ -12,9 +12,9 @@ import android.view.View;
 
 public class MainActivity extends Activity {
 
-	public SeekBar sb1,sb2,sb3,sb4,sb5;
 	private Equalizer equaliz;
 	private LinearLayout mLinearLayout;
+	private LinearLayout saves_page;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -52,7 +52,7 @@ public class MainActivity extends Activity {
         for(short i=0; i<bands; i++){
         	final short band = i;
         	
-        	//Setup view for frequency range
+        	//Setup text for frequency range
         	TextView freqTextView = new TextView(this);
             freqTextView.setLayoutParams(new ViewGroup.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
@@ -64,14 +64,14 @@ public class MainActivity extends Activity {
             LinearLayout row = new LinearLayout(this);
             row.setOrientation(LinearLayout.HORIZONTAL);
             
-            //Setup view for min Db
+            //Setup text for min Db
             TextView minDbTextView = new TextView(this);
             minDbTextView.setLayoutParams(new ViewGroup.LayoutParams(
                     ViewGroup.LayoutParams.WRAP_CONTENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT));
             minDbTextView.setText((minEQLevel / 100) + " dB");
             
-            //Set up view for max Db
+            //Setup text for max Db
             TextView maxDbTextView = new TextView(this);
             maxDbTextView.setLayoutParams(new ViewGroup.LayoutParams(
                     ViewGroup.LayoutParams.WRAP_CONTENT,
@@ -117,6 +117,7 @@ public class MainActivity extends Activity {
 	
 	public void openSavePage(View v){
 		setContentView(R.layout.saves);
+		/*saves_page = new LinearLayout(this);*/
 	}
 	
 	public void openTutorialPage(View v){
