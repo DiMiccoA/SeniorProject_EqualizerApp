@@ -1,14 +1,27 @@
 package com.fourears.equalizerapp;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.media.audiofx.Equalizer;
 import android.os.Bundle;
-import android.app.Activity;
+import android.view.Gravity;
 import android.view.Menu;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.view.*;
-import android.widget.LinearLayout;
-import android.view.View;
 
 public class MainActivity extends Activity {
 
@@ -105,9 +118,28 @@ public class MainActivity extends Activity {
 
             mLinearLayout.addView(row);
         }
-        /*Trying to create a button*/
+        /*Creates a Save button*/
         LinearLayout row = new LinearLayout(this);
         row.setOrientation(LinearLayout.HORIZONTAL);
+        Button save;
+        
+        save = new Button(this);
+        save.setLayoutParams(new ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT));
+        save.setText("Save Configuration");
+        //Setup button listener (checks for if clicked.)
+        save.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				Equalizer.Settings toBeSaved = new Equalizer.Settings();
+				toBeSaved = equaliz.getProperties();
+				saveEqualizSetting(toBeSaved);	
+			}
+		});
+        
+        row.addView(save);
         
         mLinearLayout.addView(row);
         
@@ -123,8 +155,55 @@ public class MainActivity extends Activity {
 	
 	public void openSavePage(View v){
 		setContentView(R.layout.saves);
+		
 		/*saves_page = new LinearLayout(this);*/
 	}
+	
+	/* Grab a name from user and save it to the device */
+	private void saveEqualizSetting(final Equalizer.Settings settings){
+		
+		AlertDialog.Builder savePrompt = new AlertDialog.Builder(this);
+		savePrompt.setTitle("Custom Preset Name");
+		savePrompt.setMessage("Enter a name for the new custom preset.");
+		
+		//Setup text field for user input
+		final EditText input = new EditText(this);
+		savePrompt.setView(input);
+		
+		//Setup save button on prompt
+		savePrompt.setPositiveButton("Save", new DialogInterface.OnClickListener() {
+			
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				String FILENAME = input.getText().toString();
+				try {
+					FileOutputStream fos = openFileOutput(FILENAME, Context.MODE_PRIVATE);
+					ObjectOutputStream oos = new ObjectOutputStream(fos);
+					oos.writeObject(settings);
+					
+					//Close streams.
+					fos.close();
+					oos.close();
+				} catch (FileNotFoundException e) {
+					e.printStackTrace();
+				} catch (IOException e){
+					e.printStackTrace();
+				}
+			}//End onClick
+		});
+		
+		//Do Nothing.
+		savePrompt.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+			
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				//Cancelled	
+			}
+		});
+		
+		savePrompt.show();
+	}
+
 	
 	public void openTutorialPage(View v){
 		setContentView(R.layout.tutorial);
