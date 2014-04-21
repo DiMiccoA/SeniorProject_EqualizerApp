@@ -1,14 +1,15 @@
 package com.fourears.equalizerapp;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.AlertDialog.Builder;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.media.audiofx.Equalizer;
@@ -23,22 +24,18 @@ import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements Serializable{
 
 	private Equalizer equaliz;
 	private LinearLayout mLinearLayout;
 	private LinearLayout saves_page;
+	private File settingsFolder;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
-		//mLinearLayout = new LinearLayout(this);
-        //mLinearLayout.setOrientation(LinearLayout.VERTICAL);
-
-        //setContentView(mLinearLayout);
+		settingsFolder = getDir("FourEars_Settings", Context.MODE_PRIVATE);
 		setContentView(R.layout.activity_main);
-		//setupEqualizerAndUI();
 	}
 
 	@Override
@@ -49,8 +46,7 @@ public class MainActivity extends Activity {
 	}
 	
 	private void setupEqualizerAndUI(){
-		//Create and attach a new Equalizer to the global audio stream
-		equaliz = new Equalizer(0,0);
+		equaliz = new Equalizer(0,0); //Create and attach a new Equalizer to the global audio stream
 		equaliz.setEnabled(true);
 		
 		
@@ -58,7 +54,7 @@ public class MainActivity extends Activity {
         eqTextView.setText("Equalizer:");
         mLinearLayout.addView(eqTextView);
 
-        short bands = equaliz.getNumberOfBands();      
+        final short bands = equaliz.getNumberOfBands();  
         final short minEQLevel = equaliz.getBandLevelRange()[0];
         final short maxEQLevel = equaliz.getBandLevelRange()[1];
         
@@ -133,17 +129,12 @@ public class MainActivity extends Activity {
 			
 			@Override
 			public void onClick(View v) {
-				Equalizer.Settings toBeSaved = new Equalizer.Settings();
-				toBeSaved = equaliz.getProperties();
-				saveEqualizSetting(toBeSaved);	
+				saveEqualizSetting(bands, equaliz);
 			}
 		});
         
         row.addView(save);
-        
         mLinearLayout.addView(row);
-        
-        
 	}
 
 	public void openConfigPage(View v){
@@ -160,7 +151,7 @@ public class MainActivity extends Activity {
 	}
 	
 	/* Grab a name from user and save it to the device */
-	private void saveEqualizSetting(final Equalizer.Settings settings){
+	private void saveEqualizSetting(final short bands, Equalizer equalizer){
 		
 		AlertDialog.Builder savePrompt = new AlertDialog.Builder(this);
 		savePrompt.setTitle("Custom Preset Name");
@@ -170,6 +161,17 @@ public class MainActivity extends Activity {
 		final EditText input = new EditText(this);
 		savePrompt.setView(input);
 		
+		String s = "";
+		//Define a string object to store equalizer band settings that is separated by new line characters
+		for(short i=0; i<bands; i++){
+			final short band = i;
+			final short bLevel = equalizer.getBandLevel(band);
+			String newLine = System.getProperty("line.separator");
+			s = s.concat(String.valueOf(bLevel)).concat(" ").concat(String.valueOf(band).concat(newLine));
+		}
+		
+		final String settings = s; // Creates a string object that can be saved.
+		
 		//Setup save button on prompt
 		savePrompt.setPositiveButton("Save", new DialogInterface.OnClickListener() {
 			
@@ -177,16 +179,20 @@ public class MainActivity extends Activity {
 			public void onClick(DialogInterface dialog, int which) {
 				String FILENAME = input.getText().toString();
 				try {
-					FileOutputStream fos = openFileOutput(FILENAME, Context.MODE_PRIVATE);
-					ObjectOutputStream oos = new ObjectOutputStream(fos);
-					oos.writeObject(settings);
-					
-					//Close streams.
+					File saveFile = new File(getFilesDir(), FILENAME);
+					FileOutputStream fos = new FileOutputStream(saveFile);
+					fos.write(settings.getBytes());
 					fos.close();
-					oos.close();
+					//DEBUG: Uncomment below to check if save files work.//
+					/*
+					if(saveFile.exists()){
+						throw new Exception("file found");
+					}*/
 				} catch (FileNotFoundException e) {
 					e.printStackTrace();
 				} catch (IOException e){
+					e.printStackTrace();
+				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}//End onClick
@@ -197,13 +203,12 @@ public class MainActivity extends Activity {
 			
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
-				//Cancelled	
+				//Cancel
 			}
 		});
 		
 		savePrompt.show();
 	}
-
 	
 	public void openTutorialPage(View v){
 		setContentView(R.layout.tutorial);
