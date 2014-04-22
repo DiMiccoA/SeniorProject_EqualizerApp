@@ -18,6 +18,7 @@ import android.media.audiofx.Equalizer;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -25,6 +26,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.app.ActionBar;
 
 public class MainActivity extends Activity implements Serializable {
 
@@ -38,13 +40,27 @@ public class MainActivity extends Activity implements Serializable {
 		super.onCreate(savedInstanceState);
 		settingsFolder = getDir("FourEars_Settings", Context.MODE_PRIVATE);
 		setContentView(R.layout.activity_main);
+		ActionBar actionBar = getActionBar();
+		actionBar.setHomeButtonEnabled(true);
 	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.main, menu);
-		return true;
+		return super.onCreateOptionsMenu(menu);
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+	    // Handle presses on the action bar items
+	    switch (item.getItemId()) {
+	        case android.R.id.home:
+	            setContentView(R.layout.activity_main);
+	            return true;
+	        default:
+	            return super.onOptionsItemSelected(item);
+	    }
 	}
 
 	public void openConfigPage(View v) {
