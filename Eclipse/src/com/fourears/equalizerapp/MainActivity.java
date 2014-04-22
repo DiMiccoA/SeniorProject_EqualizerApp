@@ -26,13 +26,13 @@ import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-public class MainActivity extends Activity implements Serializable{
+public class MainActivity extends Activity implements Serializable {
 
 	private Equalizer equaliz;
 	private LinearLayout mLinearLayout;
 	private LinearLayout saves_page;
 	private File settingsFolder;
-	
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -46,206 +46,231 @@ public class MainActivity extends Activity implements Serializable{
 		getMenuInflater().inflate(R.menu.main, menu);
 		return true;
 	}
-	
-	private void setupEqualizerAndUI(){
-		equaliz = new Equalizer(0,0); //Create and attach a new Equalizer to the global audio stream
+
+	public void openConfigPage(View v) {
+		mLinearLayout = new LinearLayout(this);
+		mLinearLayout.setOrientation(LinearLayout.VERTICAL);
+		setContentView(mLinearLayout);
+		setupEqualizerAndUI();
+	}
+
+	private void setupEqualizerAndUI() {
+		equaliz = new Equalizer(0, 0); // Create and attach a new Equalizer to
+										// the global audio stream
 		equaliz.setEnabled(true);
-		
-		
+
 		TextView eqTextView = new TextView(this);
-        eqTextView.setText("Equalizer:");
-        mLinearLayout.addView(eqTextView);
+		eqTextView.setText("Equalizer:");
+		mLinearLayout.addView(eqTextView);
 
-        final short bands = equaliz.getNumberOfBands();  
-        final short minEQLevel = equaliz.getBandLevelRange()[0];
-        final short maxEQLevel = equaliz.getBandLevelRange()[1];
-        
-        for(short i=0; i<bands; i++){
-        	final short band = i;
-        	
-        	//Setup text for frequency range
-        	TextView freqTextView = new TextView(this);
-            freqTextView.setLayoutParams(new ViewGroup.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT));
-            freqTextView.setGravity(Gravity.CENTER_HORIZONTAL);
-            freqTextView.setText((equaliz.getCenterFreq(band) / 1000) + " Hz");
-            mLinearLayout.addView(freqTextView);
-            
-            LinearLayout row = new LinearLayout(this);
-            row.setOrientation(LinearLayout.HORIZONTAL);
-            
-            //Setup text for min Db
-            TextView minDbTextView = new TextView(this);
-            minDbTextView.setLayoutParams(new ViewGroup.LayoutParams(
-                    ViewGroup.LayoutParams.WRAP_CONTENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT));
-            minDbTextView.setText((minEQLevel / 100) + " dB");
-            
-            //Setup text for max Db
-            TextView maxDbTextView = new TextView(this);
-            maxDbTextView.setLayoutParams(new ViewGroup.LayoutParams(
-                    ViewGroup.LayoutParams.WRAP_CONTENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT));
-            maxDbTextView.setText((maxEQLevel / 100) + " dB");
-            
-            //Setup seekbar
-            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT);
-            layoutParams.weight = 1;
-            SeekBar bar = new SeekBar(this);
-            bar.setLayoutParams(layoutParams);
-            bar.setMax(maxEQLevel - minEQLevel);
-            bar.setProgress(equaliz.getBandLevel(band));
-            
-            //Add listeners for each seekbar
-            bar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                public void onProgressChanged(SeekBar seekBar, int progress,
-                        boolean fromUser) {
-                    equaliz.setBandLevel(band, (short) (progress + minEQLevel));
-                }
+		final short bands = equaliz.getNumberOfBands();
+		final short minEQLevel = equaliz.getBandLevelRange()[0];
+		final short maxEQLevel = equaliz.getBandLevelRange()[1];
 
-                public void onStartTrackingTouch(SeekBar seekBar) {}
-                public void onStopTrackingTouch(SeekBar seekBar) {}
-            });
-            
-            row.addView(minDbTextView);
-            row.addView(bar);
-            row.addView(maxDbTextView);
+		for (short i = 0; i < bands; i++) {
+			final short band = i;
 
-            mLinearLayout.addView(row);
-        }
-        /*Creates a Save button*/
-        LinearLayout row = new LinearLayout(this);
-        row.setOrientation(LinearLayout.HORIZONTAL);
-        Button save;
-        
-        save = new Button(this);
-        save.setLayoutParams(new ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT));
-        save.setText("Save Configuration");
-        //Setup button listener (checks for if clicked.)
-        save.setOnClickListener(new View.OnClickListener() {
-			
+			// Setup text for frequency range
+			TextView freqTextView = new TextView(this);
+			freqTextView.setLayoutParams(new ViewGroup.LayoutParams(
+					ViewGroup.LayoutParams.MATCH_PARENT,
+					ViewGroup.LayoutParams.WRAP_CONTENT));
+			freqTextView.setGravity(Gravity.CENTER_HORIZONTAL);
+			freqTextView.setText((equaliz.getCenterFreq(band) / 1000) + " Hz");
+			mLinearLayout.addView(freqTextView);
+
+			LinearLayout row = new LinearLayout(this);
+			row.setOrientation(LinearLayout.HORIZONTAL);
+
+			// Setup text for min Db
+			TextView minDbTextView = new TextView(this);
+			minDbTextView.setLayoutParams(new ViewGroup.LayoutParams(
+					ViewGroup.LayoutParams.WRAP_CONTENT,
+					ViewGroup.LayoutParams.WRAP_CONTENT));
+			minDbTextView.setText((minEQLevel / 100) + " dB");
+
+			// Setup text for max Db
+			TextView maxDbTextView = new TextView(this);
+			maxDbTextView.setLayoutParams(new ViewGroup.LayoutParams(
+					ViewGroup.LayoutParams.WRAP_CONTENT,
+					ViewGroup.LayoutParams.WRAP_CONTENT));
+			maxDbTextView.setText((maxEQLevel / 100) + " dB");
+
+			// Setup seekbar
+			LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+					ViewGroup.LayoutParams.MATCH_PARENT,
+					ViewGroup.LayoutParams.WRAP_CONTENT);
+			layoutParams.weight = 1;
+			SeekBar bar = new SeekBar(this);
+			bar.setLayoutParams(layoutParams);
+			bar.setMax(maxEQLevel - minEQLevel);
+			bar.setProgress(equaliz.getBandLevel(band));
+
+			// Add listeners for each seekbar
+			bar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+				public void onProgressChanged(SeekBar seekBar, int progress,
+						boolean fromUser) {
+					equaliz.setBandLevel(band, (short) (progress + minEQLevel));
+				}
+
+				public void onStartTrackingTouch(SeekBar seekBar) {
+				}
+
+				public void onStopTrackingTouch(SeekBar seekBar) {
+				}
+			});
+
+			row.addView(minDbTextView);
+			row.addView(bar);
+			row.addView(maxDbTextView);
+
+			mLinearLayout.addView(row);
+		}
+		/* Creates a Save button */
+		LinearLayout row = new LinearLayout(this);
+		row.setOrientation(LinearLayout.HORIZONTAL);
+		Button save;
+
+		save = new Button(this);
+		save.setLayoutParams(new ViewGroup.LayoutParams(
+				ViewGroup.LayoutParams.MATCH_PARENT,
+				ViewGroup.LayoutParams.WRAP_CONTENT));
+		save.setText("Save Configuration");
+		// Setup button listener (checks for if clicked.)
+		save.setOnClickListener(new View.OnClickListener() {
+
 			@Override
 			public void onClick(View v) {
 				saveEqualizSetting(bands, equaliz);
 			}
 		});
-        
-        row.addView(save);
-        mLinearLayout.addView(row);
+
+		row.addView(save);
+		mLinearLayout.addView(row);
 	}
-	
+
+	private void loadEqualizSetting(File file) {
+		openConfigPage(mLinearLayout);
+		//setContentView(mLinearLayout);
+	}
+
 	/* Grab a name from user and save it to the device */
-	private void saveEqualizSetting(final short bands, Equalizer equalizer){
-		
+	private void saveEqualizSetting(final short bands, Equalizer equalizer) {
+
 		AlertDialog.Builder savePrompt = new AlertDialog.Builder(this);
 		savePrompt.setTitle("Custom Preset Name");
 		savePrompt.setMessage("Enter a name for the new custom preset.");
-		
-		//Setup text field for user input
+
+		// Setup text field for user input
 		final EditText input = new EditText(this);
 		savePrompt.setView(input);
-		
+
 		String s = "";
-		//Define a string object to store equalizer band settings that is separated by new line characters
-		for(short i=0; i<bands; i++){
+		// Define a string object to store equalizer band settings that is
+		// separated by new line characters
+		for (short i = 0; i < bands; i++) {
 			final short band = i;
 			final short bLevel = equalizer.getBandLevel(band);
 			String newLine = System.getProperty("line.separator");
-			s = s.concat(String.valueOf(bLevel)).concat(" ").concat(String.valueOf(band).concat(newLine));
+			s = s.concat(String.valueOf(bLevel)).concat(" ")
+					.concat(String.valueOf(band).concat(newLine));
 		}
-		
+
 		final String settings = s; // Creates a string object that can be saved.
-		
-		//Setup save button on prompt
-		savePrompt.setPositiveButton("Save", new DialogInterface.OnClickListener() {
-			
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				String FILENAME = input.getText().toString();
-				try {
-					File saveFile = new File(getFilesDir(), FILENAME);
-					FileOutputStream fos = new FileOutputStream(saveFile);
-					fos.write(settings.getBytes());
-					fos.close();
-					//DEBUG: Uncomment below to check if save files work.//
-					/*
-					if(saveFile.exists()){
-						throw new Exception("file found");
-					}*/
-				} catch (FileNotFoundException e) {
-					e.printStackTrace();
-				} catch (IOException e){
-					e.printStackTrace();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}//End onClick
-		});
-		
-		//Do Nothing.
-		savePrompt.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-			
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				//Cancel
-			}
-		});
-		
+
+		// Setup save button on prompt
+		savePrompt.setPositiveButton("Save",
+				new DialogInterface.OnClickListener() {
+
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						String FILENAME = input.getText().toString();
+						try {
+							File saveFile = new File(getFilesDir(), FILENAME);
+							FileOutputStream fos = new FileOutputStream(
+									saveFile);
+							fos.write(settings.getBytes());
+							fos.close();
+							// DEBUG: Uncomment below to check if save files
+							// work.//
+							/*
+							 * if(saveFile.exists()){ throw new
+							 * Exception("file found"); }
+							 */
+						} catch (FileNotFoundException e) {
+							e.printStackTrace();
+						} catch (IOException e) {
+							e.printStackTrace();
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}// End onClick
+				});
+
+		// Do Nothing.
+		savePrompt.setNegativeButton("Cancel",
+				new DialogInterface.OnClickListener() {
+
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						// Cancel
+					}
+				});
+
 		savePrompt.show();
 	}
 
-	public void openConfigPage(View v){
-		mLinearLayout = new LinearLayout(this);
-        mLinearLayout.setOrientation(LinearLayout.VERTICAL);
-		setContentView(mLinearLayout);
-		setupEqualizerAndUI();
-	}
-	
-	public void openSavePage(View v){
+	public void openSavePage(View v) {
 		LinearLayout savesLayout = new LinearLayout(this);
 		savesLayout.setOrientation(LinearLayout.VERTICAL);
 		setContentView(savesLayout);
 		setupSavesPage(savesLayout);
-//		setContentView(R.layout.saves); 
-		/*saves_page = new LinearLayout(this);*/
+		// setContentView(R.layout.saves);
+		/* saves_page = new LinearLayout(this); */
 	}
-	
-	private void setupSavesPage(LinearLayout saves){
+
+	private void setupSavesPage(LinearLayout saves) {
 		List<File> files = getListFiles(new File(getFilesDir().toString()));
-		
-		for(File file : files){
-	        LinearLayout row = new LinearLayout(this);
-	        row.setOrientation(LinearLayout.HORIZONTAL);
-	        
+
+		for (File file : files) {
+			final File file_temp = file;
+			LinearLayout row = new LinearLayout(this);
+			row.setOrientation(LinearLayout.HORIZONTAL);
+
 			Button b = new Button(this);
-	        b.setLayoutParams(new ViewGroup.LayoutParams(
-	                ViewGroup.LayoutParams.MATCH_PARENT,
-	                ViewGroup.LayoutParams.WRAP_CONTENT));
-	        b.setText(file.getName());
-	        row.addView(b);
-	        saves.addView(row);
+			b.setLayoutParams(new ViewGroup.LayoutParams(
+					ViewGroup.LayoutParams.MATCH_PARENT,
+					ViewGroup.LayoutParams.WRAP_CONTENT));
+			b.setText(file.getName());
+
+			// Setup button listener
+			b.setOnClickListener(new View.OnClickListener() {
+
+				@Override
+				public void onClick(View v) {
+					loadEqualizSetting(file_temp);
+				}
+			});
+
+			row.addView(b);
+			saves.addView(row);
 		}
 	}
-	
-	 private List<File> getListFiles(File parentDir) {
-		    ArrayList<File> inFiles = new ArrayList<File>();
-		    File[] files = parentDir.listFiles();
-		    for (File file : files) {
-		        if (file.isDirectory()) {
-		            inFiles.addAll(getListFiles(file));
-		        } else {
-		            inFiles.add(file);
-		        }
-		    }
-		    return inFiles;
+
+	private List<File> getListFiles(File parentDir) {
+		ArrayList<File> inFiles = new ArrayList<File>();
+		File[] files = parentDir.listFiles();
+		for(File file : files) {
+			if(file.isDirectory()) {
+				inFiles.addAll(getListFiles(file));
+			} else {
+				inFiles.add(file);
+			}
 		}
-	
-	public void openTutorialPage(View v){
+		return inFiles;
+	}
+
+	public void openTutorialPage(View v) {
 		setContentView(R.layout.tutorial);
 	}
 
