@@ -7,6 +7,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -136,19 +138,6 @@ public class MainActivity extends Activity implements Serializable{
         row.addView(save);
         mLinearLayout.addView(row);
 	}
-
-	public void openConfigPage(View v){
-		mLinearLayout = new LinearLayout(this);
-        mLinearLayout.setOrientation(LinearLayout.VERTICAL);
-		setContentView(mLinearLayout);
-		setupEqualizerAndUI();
-	}
-	
-	public void openSavePage(View v){
-		setContentView(R.layout.saves);
-		
-		/*saves_page = new LinearLayout(this);*/
-	}
 	
 	/* Grab a name from user and save it to the device */
 	private void saveEqualizSetting(final short bands, Equalizer equalizer){
@@ -209,6 +198,52 @@ public class MainActivity extends Activity implements Serializable{
 		
 		savePrompt.show();
 	}
+
+	public void openConfigPage(View v){
+		mLinearLayout = new LinearLayout(this);
+        mLinearLayout.setOrientation(LinearLayout.VERTICAL);
+		setContentView(mLinearLayout);
+		setupEqualizerAndUI();
+	}
+	
+	public void openSavePage(View v){
+		LinearLayout savesLayout = new LinearLayout(this);
+		savesLayout.setOrientation(LinearLayout.VERTICAL);
+		setContentView(savesLayout);
+		setupSavesPage(savesLayout);
+//		setContentView(R.layout.saves); 
+		/*saves_page = new LinearLayout(this);*/
+	}
+	
+	private void setupSavesPage(LinearLayout saves){
+		List<File> files = getListFiles(new File(getFilesDir().toString()));
+		
+		for(File file : files){
+	        LinearLayout row = new LinearLayout(this);
+	        row.setOrientation(LinearLayout.HORIZONTAL);
+	        
+			Button b = new Button(this);
+	        b.setLayoutParams(new ViewGroup.LayoutParams(
+	                ViewGroup.LayoutParams.MATCH_PARENT,
+	                ViewGroup.LayoutParams.WRAP_CONTENT));
+	        b.setText(file.getName());
+	        row.addView(b);
+	        saves.addView(row);
+		}
+	}
+	
+	 private List<File> getListFiles(File parentDir) {
+		    ArrayList<File> inFiles = new ArrayList<File>();
+		    File[] files = parentDir.listFiles();
+		    for (File file : files) {
+		        if (file.isDirectory()) {
+		            inFiles.addAll(getListFiles(file));
+		        } else {
+		            inFiles.add(file);
+		        }
+		    }
+		    return inFiles;
+		}
 	
 	public void openTutorialPage(View v){
 		setContentView(R.layout.tutorial);
