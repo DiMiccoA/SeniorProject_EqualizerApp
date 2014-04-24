@@ -1,10 +1,12 @@
 package com.fourears.equalizerapp;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -16,6 +18,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.media.audiofx.Equalizer;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -34,11 +37,17 @@ public class MainActivity extends Activity implements Serializable {
 	private LinearLayout mLinearLayout;
 	private LinearLayout saves_page;
 	private File settingsFolder;
+	private SeekBar[] bars;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		settingsFolder = getDir("FourEars_Settings", Context.MODE_PRIVATE);
+		
+		mLinearLayout = new LinearLayout(this);
+		mLinearLayout.setOrientation(LinearLayout.VERTICAL);
+		setupEqualizerAndUI();
+
 		setContentView(R.layout.activity_main);
 		ActionBar actionBar = getActionBar();
 		actionBar.setHomeButtonEnabled(true);
@@ -64,10 +73,7 @@ public class MainActivity extends Activity implements Serializable {
 	}
 
 	public void openConfigPage(View v) {
-		mLinearLayout = new LinearLayout(this);
-		mLinearLayout.setOrientation(LinearLayout.VERTICAL);
 		setContentView(mLinearLayout);
-		setupEqualizerAndUI();
 	}
 
 	private void setupEqualizerAndUI() {
@@ -82,10 +88,11 @@ public class MainActivity extends Activity implements Serializable {
 		final short bands = equaliz.getNumberOfBands();
 		final short minEQLevel = equaliz.getBandLevelRange()[0];
 		final short maxEQLevel = equaliz.getBandLevelRange()[1];
+		
+		bars = new SeekBar[bands];
 
 		for (short i = 0; i < bands; i++) {
 			final short band = i;
-
 			// Setup text for frequency range
 			TextView freqTextView = new TextView(this);
 			freqTextView.setLayoutParams(new ViewGroup.LayoutParams(
@@ -117,13 +124,18 @@ public class MainActivity extends Activity implements Serializable {
 					ViewGroup.LayoutParams.MATCH_PARENT,
 					ViewGroup.LayoutParams.WRAP_CONTENT);
 			layoutParams.weight = 1;
-			SeekBar bar = new SeekBar(this);
+			/*SeekBar bar = new SeekBar(this);
 			bar.setLayoutParams(layoutParams);
 			bar.setMax(maxEQLevel - minEQLevel);
-			bar.setProgress(equaliz.getBandLevel(band));
+			bar.setProgress(equaliz.getBandLevel(band));*/
+			
+			bars[i] = new SeekBar(this);
+			bars[i].setLayoutParams(layoutParams);
+			bars[i].setMax(maxEQLevel - minEQLevel);
+			bars[i].setProgress(equaliz.getBandLevel(band));
 
 			// Add listeners for each seekbar
-			bar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+			bars[i].setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 				public void onProgressChanged(SeekBar seekBar, int progress,
 						boolean fromUser) {
 					equaliz.setBandLevel(band, (short) (progress + minEQLevel));
@@ -137,7 +149,7 @@ public class MainActivity extends Activity implements Serializable {
 			});
 
 			row.addView(minDbTextView);
-			row.addView(bar);
+			row.addView(bars[i]);
 			row.addView(maxDbTextView);
 
 			mLinearLayout.addView(row);
@@ -166,8 +178,30 @@ public class MainActivity extends Activity implements Serializable {
 	}
 
 	private void loadEqualizSetting(File file) {
-		openConfigPage(mLinearLayout);
-		//setContentView(mLinearLayout);
+		String line = null;
+		String[] temp = null;
+		try {
+			FileInputStream fis = new FileInputStream(file);
+			BufferedReader reader = new BufferedReader(new InputStreamReader(fis));
+			StringBuilder sb = new StringBuilder();
+			for(int i = 0; i<bars.length; i++){
+				line = reader.readLine();
+				temp = line.split(" ");
+				equaliz.setBandLevel(Short.parseShort(temp[1]), Short.parseShort(temp[0]));
+				bars[i].setProgress(Short.parseShort(temp[0]));
+			}
+			/*while((line = reader.readLine()) != null){
+				temp = line.split(" ");
+				equaliz.setBandLevel(Short.parseShort(temp[1]), Short.parseShort(temp[0]));
+			}*/
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch(IOException e){
+			e.printStackTrace();
+		}
+		
+		//openConfigPage(mLinearLayout);
+		setContentView(mLinearLayout);
 	}
 
 	/* Grab a name from user and save it to the device */
