@@ -16,6 +16,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.drawable.Drawable;
 import android.media.audiofx.Equalizer;
 import android.os.Bundle;
 import android.util.Log;
@@ -188,11 +189,20 @@ public class MainActivity extends Activity implements Serializable {
 				line = reader.readLine();
 				temp = line.split(" ");
 				equaliz.setBandLevel(Short.parseShort(temp[1]), Short.parseShort(temp[0]));
-				bars[i].setProgress(Short.parseShort(temp[0]));
+				//Drawable t = bars[i].getThumb();
+				//t.setLevel(Integer.parseInt(temp[0]));
+				//bars[i].setThumb(t);
+				//bars[i].setMax(0);
+				//bars[i].setProgress(0);
+				//bars[i].setMax(Short.parseShort(temp[0]));//equaliz.getBandLevelRange()[1] - equaliz.getBandLevelRange()[0]);
+				bars[i].setProgress(Integer.parseInt(temp[0]));
+				bars[i].updateThumb()
+				//bars[i].onSizeChanged(bars[i].getWidth(),bars[i].getHeight(),0,0);
 			}
 			/*while((line = reader.readLine()) != null){
 				temp = line.split(" ");
 				equaliz.setBandLevel(Short.parseShort(temp[1]), Short.parseShort(temp[0]));
+				
 			}*/
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
