@@ -68,6 +68,9 @@ public class MainActivity extends Activity implements Serializable {
 	        case android.R.id.home:
 	            setContentView(R.layout.activity_main);
 	            return true;
+	        case R.id.action_back:
+	        	setContentView(R.layout.activity_main);
+	            return true;
 	        default:
 	            return super.onOptionsItemSelected(item);
 	    }

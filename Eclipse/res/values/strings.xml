@@ -7,5 +7,6 @@
     <string name="configure_page">Configure</string>
     <string name="save_page">Saves</string>
     <string name="tutorial_page">Tutorial</string>
+    <string name="action_back">ic_action_back</string>
 
 </resources>
