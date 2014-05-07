@@ -26,8 +26,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.app.ActionBar;
@@ -39,6 +42,7 @@ public class MainActivity extends Activity implements Serializable {
 	private LinearLayout saves_page;
 	private File settingsFolder;
 	private SeekBar[] bars;
+	private RadioGroup rGroup;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -198,8 +202,8 @@ public class MainActivity extends Activity implements Serializable {
 				//bars[i].setMax(0);
 				//bars[i].setProgress(0);
 				//bars[i].setMax(Short.parseShort(temp[0]));//equaliz.getBandLevelRange()[1] - equaliz.getBandLevelRange()[0]);
-				bars[i].setProgress(Integer.parseInt(temp[0]));
-				bars[i].updateThumb()
+				//bars[i].setProgress(Integer.parseInt(temp[0]));
+				//bars[i].updateThumb()
 				//bars[i].onSizeChanged(bars[i].getWidth(),bars[i].getHeight(),0,0);
 			}
 			/*while((line = reader.readLine()) != null){
@@ -295,32 +299,26 @@ public class MainActivity extends Activity implements Serializable {
 	private void setupSavesPage(LinearLayout saves) {
 		//Sets up the saves page by finding every single file returned by 
 		//the getFilesDir() function
+		LinearLayout row = new LinearLayout(this);
+		row.setOrientation(LinearLayout.HORIZONTAL);
 		
 		List<File> files = getListFiles(new File(getFilesDir().toString()));
+		int id_count = 0;
+		RadioGroup rGroup = new RadioGroup(this);
+		rGroup.setId(id_count++);
 		//Nothing in this loop is saved.
 		for (File file : files) {
 			final File file_temp = file;
-			LinearLayout row = new LinearLayout(this);
-			row.setOrientation(LinearLayout.HORIZONTAL);
-			//TODO change button to radio buttons
-			Button b = new Button(this);
-			b.setLayoutParams(new ViewGroup.LayoutParams(
+			RadioButton radio = new RadioButton(this);
+			radio.setLayoutParams(new ViewGroup.LayoutParams(
 					ViewGroup.LayoutParams.MATCH_PARENT,
 					ViewGroup.LayoutParams.WRAP_CONTENT));
-			b.setText(file.getName()); //This is how I get the file name for the buttons
-
-			// Setup button listener
-			b.setOnClickListener(new View.OnClickListener() {
-
-				@Override
-				public void onClick(View v) {
-					loadEqualizSetting(file_temp);
-				}
-			});
-
-			row.addView(b);
-			saves.addView(row);
+			radio.setId(id_count++);
+			radio.setText(file.getName());
+			rGroup.addView(radio);
 		}
+		row.addView(rGroup);
+		saves.addView(row);
 	}
 
 	private List<File> getListFiles(File parentDir) {
