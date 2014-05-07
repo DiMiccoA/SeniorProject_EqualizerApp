@@ -293,18 +293,21 @@ public class MainActivity extends Activity implements Serializable {
 	}
 
 	private void setupSavesPage(LinearLayout saves) {
+		//Sets up the saves page by finding every single file returned by 
+		//the getFilesDir() function
+		
 		List<File> files = getListFiles(new File(getFilesDir().toString()));
-
+		//Nothing in this loop is saved.
 		for (File file : files) {
 			final File file_temp = file;
 			LinearLayout row = new LinearLayout(this);
 			row.setOrientation(LinearLayout.HORIZONTAL);
-
+			//TODO change button to radio buttons
 			Button b = new Button(this);
 			b.setLayoutParams(new ViewGroup.LayoutParams(
 					ViewGroup.LayoutParams.MATCH_PARENT,
 					ViewGroup.LayoutParams.WRAP_CONTENT));
-			b.setText(file.getName());
+			b.setText(file.getName()); //This is how I get the file name for the buttons
 
 			// Setup button listener
 			b.setOnClickListener(new View.OnClickListener() {
@@ -321,6 +324,8 @@ public class MainActivity extends Activity implements Serializable {
 	}
 
 	private List<File> getListFiles(File parentDir) {
+		//Obtained mostly from a stackoverflow page. It returns every file
+		//in a given directory as an array.
 		ArrayList<File> inFiles = new ArrayList<File>();
 		File[] files = parentDir.listFiles();
 		for(File file : files) {
