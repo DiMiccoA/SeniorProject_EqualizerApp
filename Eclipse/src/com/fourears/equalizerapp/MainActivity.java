@@ -7,48 +7,47 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.os.Bundle;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.graphics.drawable.Drawable;
-import android.media.audiofx.Equalizer;
-import android.os.Bundle;
-import android.util.Log;
+import android.app.ActionBar;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.app.ActionBar;
+import android.widget.ScrollView;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.media.audiofx.Equalizer;
 
-public class MainActivity extends Activity implements Serializable {
+public class MainActivity extends Activity {
 
 	private Equalizer equaliz;
 	private LinearLayout mLinearLayout;
-	private LinearLayout saves_page;
+	@SuppressWarnings("unused")
 	private File settingsFolder;
 	private SeekBar[] bars;
+	@SuppressWarnings("unused")
 	private RadioGroup rGroup;
+	private RadioGroup group;
+	public int id_count;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		settingsFolder = getDir("FourEars_Settings", Context.MODE_PRIVATE);
-		
+		id_count = 0;
 		mLinearLayout = new LinearLayout(this);
 		mLinearLayout.setOrientation(LinearLayout.VERTICAL);
 		setupEqualizerAndUI();
@@ -98,7 +97,7 @@ public class MainActivity extends Activity implements Serializable {
 		final short maxEQLevel = equaliz.getBandLevelRange()[1];
 		
 		bars = new SeekBar[bands];
-
+		/* Modified code from Android API examples */
 		for (short i = 0; i < bands; i++) {
 			final short band = i;
 			// Setup text for frequency range
@@ -132,15 +131,12 @@ public class MainActivity extends Activity implements Serializable {
 					ViewGroup.LayoutParams.MATCH_PARENT,
 					ViewGroup.LayoutParams.WRAP_CONTENT);
 			layoutParams.weight = 1;
-			/*SeekBar bar = new SeekBar(this);
-			bar.setLayoutParams(layoutParams);
-			bar.setMax(maxEQLevel - minEQLevel);
-			bar.setProgress(equaliz.getBandLevel(band));*/
 			
 			bars[i] = new SeekBar(this);
 			bars[i].setLayoutParams(layoutParams);
 			bars[i].setMax(maxEQLevel - minEQLevel);
 			bars[i].setProgress(equaliz.getBandLevel(band));
+			bars[i].setId(id_count++);
 
 			// Add listeners for each seekbar
 			bars[i].setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -172,9 +168,9 @@ public class MainActivity extends Activity implements Serializable {
 				ViewGroup.LayoutParams.MATCH_PARENT,
 				ViewGroup.LayoutParams.WRAP_CONTENT));
 		save.setText("Save Configuration");
+		
 		// Setup button listener (checks for if clicked.)
 		save.setOnClickListener(new View.OnClickListener() {
-
 			@Override
 			public void onClick(View v) {
 				saveEqualizSetting(bands, equaliz);
@@ -185,39 +181,28 @@ public class MainActivity extends Activity implements Serializable {
 		mLinearLayout.addView(row);
 	}
 
+	@SuppressWarnings("resource")
 	private void loadEqualizSetting(File file) {
 		String line = null;
 		String[] temp = null;
+		final short minEQLevel = equaliz.getBandLevelRange()[0];
 		try {
 			FileInputStream fis = new FileInputStream(file);
 			BufferedReader reader = new BufferedReader(new InputStreamReader(fis));
-			StringBuilder sb = new StringBuilder();
 			for(int i = 0; i<bars.length; i++){
 				line = reader.readLine();
 				temp = line.split(" ");
+									//Band Number				Band Level
 				equaliz.setBandLevel(Short.parseShort(temp[1]), Short.parseShort(temp[0]));
-				//Drawable t = bars[i].getThumb();
-				//t.setLevel(Integer.parseInt(temp[0]));
-				//bars[i].setThumb(t);
-				//bars[i].setMax(0);
-				//bars[i].setProgress(0);
-				//bars[i].setMax(Short.parseShort(temp[0]));//equaliz.getBandLevelRange()[1] - equaliz.getBandLevelRange()[0]);
-				//bars[i].setProgress(Integer.parseInt(temp[0]));
-				//bars[i].updateThumb()
-				//bars[i].onSizeChanged(bars[i].getWidth(),bars[i].getHeight(),0,0);
+				bars[i].setProgress(Short.parseShort(temp[0])-minEQLevel);
+				//setProgress activates the seek bar listener, the equation
+				//inside undoes what happens when the listener acts.
 			}
-			/*while((line = reader.readLine()) != null){
-				temp = line.split(" ");
-				equaliz.setBandLevel(Short.parseShort(temp[1]), Short.parseShort(temp[0]));
-				
-			}*/
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch(IOException e){
 			e.printStackTrace();
 		}
-		
-		//openConfigPage(mLinearLayout);
 		setContentView(mLinearLayout);
 	}
 
@@ -258,12 +243,6 @@ public class MainActivity extends Activity implements Serializable {
 									saveFile);
 							fos.write(settings.getBytes());
 							fos.close();
-							// DEBUG: Uncomment below to check if save files
-							// work.//
-							/*
-							 * if(saveFile.exists()){ throw new
-							 * Exception("file found"); }
-							 */
 						} catch (FileNotFoundException e) {
 							e.printStackTrace();
 						} catch (IOException e) {
@@ -277,7 +256,6 @@ public class MainActivity extends Activity implements Serializable {
 		// Do Nothing.
 		savePrompt.setNegativeButton("Cancel",
 				new DialogInterface.OnClickListener() {
-
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
 						// Cancel
@@ -288,27 +266,26 @@ public class MainActivity extends Activity implements Serializable {
 	}
 
 	public void openSavePage(View v) {
+		ScrollView scrollSaves = new ScrollView(this); //Allows for scrolling
 		LinearLayout savesLayout = new LinearLayout(this);
 		savesLayout.setOrientation(LinearLayout.VERTICAL);
-		setContentView(savesLayout);
+		scrollSaves.addView(savesLayout);
+		setContentView(scrollSaves);
 		setupSavesPage(savesLayout);
-		// setContentView(R.layout.saves);
-		/* saves_page = new LinearLayout(this); */
 	}
 
 	private void setupSavesPage(LinearLayout saves) {
 		//Sets up the saves page by finding every single file returned by 
 		//the getFilesDir() function
+		
 		LinearLayout row = new LinearLayout(this);
 		row.setOrientation(LinearLayout.HORIZONTAL);
 		
 		List<File> files = getListFiles(new File(getFilesDir().toString()));
-		int id_count = 0;
 		RadioGroup rGroup = new RadioGroup(this);
 		rGroup.setId(id_count++);
 		//Nothing in this loop is saved.
 		for (File file : files) {
-			final File file_temp = file;
 			RadioButton radio = new RadioButton(this);
 			radio.setLayoutParams(new ViewGroup.LayoutParams(
 					ViewGroup.LayoutParams.MATCH_PARENT,
@@ -319,6 +296,50 @@ public class MainActivity extends Activity implements Serializable {
 		}
 		row.addView(rGroup);
 		saves.addView(row);
+		Button load_button = new Button(this);
+		Button delete_button = new Button(this);
+		
+		group = (RadioGroup) findViewById(rGroup.getId());
+		
+		load_button.setLayoutParams(new ViewGroup.LayoutParams(
+					ViewGroup.LayoutParams.MATCH_PARENT,
+					ViewGroup.LayoutParams.WRAP_CONTENT));
+		load_button.setId(id_count++);
+		load_button.setText("Load Configuration");
+		load_button.setOnClickListener(new View.OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				int id = group.getCheckedRadioButtonId();
+				RadioButton rb = (RadioButton) findViewById(id);
+				String file = getFilesDir().toString().concat("/").concat((String) rb.getText());;
+				File toBeLoaded = new File(file);
+				loadEqualizSetting(toBeLoaded);
+			}
+		});
+		
+		
+		delete_button.setLayoutParams(new ViewGroup.LayoutParams(
+				ViewGroup.LayoutParams.MATCH_PARENT,
+				ViewGroup.LayoutParams.WRAP_CONTENT));
+		delete_button.setId(id_count++);
+		delete_button.setText("Delete Configuration");
+		delete_button.setOnClickListener(new View.OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				int id = group.getCheckedRadioButtonId();
+				RadioButton rb = (RadioButton) findViewById(id);
+				String file = getFilesDir().toString().concat("/").concat((String) rb.getText());;
+				File toBeDeleted = new File(file);
+				if(toBeDeleted.delete() == true){
+					group.removeView(rb);
+				}
+			}
+		});
+		
+		saves.addView(load_button);
+		saves.addView(delete_button);
 	}
 
 	private List<File> getListFiles(File parentDir) {
