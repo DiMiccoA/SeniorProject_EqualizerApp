@@ -14,6 +14,7 @@ import android.os.Bundle;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ActionBar;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -42,6 +43,7 @@ public class MainActivity extends Activity {
 	private RadioGroup rGroup;
 	private RadioGroup group;
 	public int id_count;
+	private boolean check_flag = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -174,11 +176,72 @@ public class MainActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 				saveEqualizSetting(bands, equaliz);
-			}
+				//saveFile(bands, equaliz);
+				
+			}//End button click
 		});
 
 		row.addView(save);
 		mLinearLayout.addView(row);
+	}
+	
+	private void saveEqualizSetting(short bands, Equalizer equalizer){
+		AlertDialog.Builder savePrompt = new AlertDialog.Builder(this);
+		savePrompt.setTitle("Custom Preset Name");
+		savePrompt.setMessage("Enter a name for the new custom preset.");
+
+		// Setup text field for user input
+		final EditText input = new EditText(this);
+		savePrompt.setView(input);
+		
+		String s = "";
+		// Define a string object to store equalizer band settings that is
+		// separated by new line characters
+		for (short i = 0; i < bands; i++) {
+			final short band = i;
+			final short bLevel = equalizer.getBandLevel(band);
+			String newLine = System.getProperty("line.separator");
+			s = s.concat(String.valueOf(bLevel)).concat(" ")
+					.concat(String.valueOf(band).concat(newLine));
+		}
+
+		final String settings = s; // Creates a string object that can be saved.
+		
+		
+		// Setup save button on prompt
+		savePrompt.setPositiveButton("Save",
+				new DialogInterface.OnClickListener() {
+
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						String FILENAME = input.getText().toString();
+						try {
+							File saveFile = new File(getFilesDir(), FILENAME);
+							FileOutputStream fos = new FileOutputStream(
+									saveFile);
+							fos.write(settings.getBytes());
+							fos.close();
+						} catch (FileNotFoundException e) {
+							e.printStackTrace();
+						} catch (IOException e) {
+							e.printStackTrace();
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}// End onClick
+				});
+
+		// Do Nothing.
+		savePrompt.setNegativeButton("Cancel",
+				new DialogInterface.OnClickListener() {
+
+					@Override
+					public void onClick(DialogInterface arg0, int arg1) {
+					
+					}
+				});
+
+		savePrompt.show();
 	}
 
 	@SuppressWarnings("resource")
@@ -207,7 +270,7 @@ public class MainActivity extends Activity {
 	}
 
 	/* Grab a name from user and save it to the device */
-	private void saveEqualizSetting(final short bands, Equalizer equalizer) {
+	private String promptSaveName() {
 
 		AlertDialog.Builder savePrompt = new AlertDialog.Builder(this);
 		savePrompt.setTitle("Custom Preset Name");
@@ -216,40 +279,14 @@ public class MainActivity extends Activity {
 		// Setup text field for user input
 		final EditText input = new EditText(this);
 		savePrompt.setView(input);
-
-		String s = "";
-		// Define a string object to store equalizer band settings that is
-		// separated by new line characters
-		for (short i = 0; i < bands; i++) {
-			final short band = i;
-			final short bLevel = equalizer.getBandLevel(band);
-			String newLine = System.getProperty("line.separator");
-			s = s.concat(String.valueOf(bLevel)).concat(" ")
-					.concat(String.valueOf(band).concat(newLine));
-		}
-
-		final String settings = s; // Creates a string object that can be saved.
-
+		
 		// Setup save button on prompt
 		savePrompt.setPositiveButton("Save",
 				new DialogInterface.OnClickListener() {
 
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
-						String FILENAME = input.getText().toString();
-						try {
-							File saveFile = new File(getFilesDir(), FILENAME);
-							FileOutputStream fos = new FileOutputStream(
-									saveFile);
-							fos.write(settings.getBytes());
-							fos.close();
-						} catch (FileNotFoundException e) {
-							e.printStackTrace();
-						} catch (IOException e) {
-							e.printStackTrace();
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
+						check_flag = true;
 					}// End onClick
 				});
 
@@ -258,11 +295,93 @@ public class MainActivity extends Activity {
 				new DialogInterface.OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
-						// Cancel
+						check_flag = false;
 					}
 				});
 
 		savePrompt.show();
+		if (check_flag == false){
+			return "";
+		}else{
+			return input.getText().toString();
+		}
+	}
+	
+	private boolean isOverwriteOk(){
+		AlertDialog.Builder overwriteOk = new AlertDialog.Builder(this);
+		overwriteOk.setTitle("File with that name already exists!");
+		overwriteOk.setMessage("Do you want to overwrite the file?");
+		
+		overwriteOk.setPositiveButton("Yes",
+				new DialogInterface.OnClickListener() {
+
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						check_flag = true;
+					}// End onClick
+				});
+
+		// Do Nothing.
+		overwriteOk.setNegativeButton("Cancel",
+				new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						check_flag = false;
+					}
+				});
+		
+		overwriteOk.show();
+		
+		return check_flag;
+	}
+	
+	private void saveFile(short bands, Equalizer equalizer){
+		List<File> currentListOfFiles = getListFiles(new File(getFilesDir().toString()));
+		boolean save = true;
+		final String saveName = promptSaveName();
+		String FILENAME = saveName;
+		
+		for(File file : currentListOfFiles){
+			Log.d(FILENAME, "In forloop");
+			if(FILENAME.equals(file.getName())){
+				if(isOverwriteOk()){
+					break;
+				}else{
+					save = false;
+					break;
+				}
+			}
+		}
+		//Checks if it's OK to save the file; if it is, then it saves
+		//otherwise it does nothing.
+		if(save){
+			String s = "";
+			// Define a string object to store equalizer band settings that is
+			// separated by new line characters
+			for (short i = 0; i < bands; i++) {
+				final short band = i;
+				final short bLevel = equalizer.getBandLevel(band);
+				String newLine = System.getProperty("line.separator");
+				s = s.concat(String.valueOf(bLevel)).concat(" ")
+						.concat(String.valueOf(band).concat(newLine));
+			}
+
+			final String settings = s; // Creates a string object that can be saved.
+			
+			try {
+				File saveFile = new File(getFilesDir(), FILENAME);
+				FileOutputStream fos = new FileOutputStream(
+						saveFile);
+				fos.write(settings.getBytes());
+				fos.close();
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}//End if-statement
 	}
 
 	public void openSavePage(View v) {
@@ -312,7 +431,7 @@ public class MainActivity extends Activity {
 			public void onClick(View v) {
 				int id = group.getCheckedRadioButtonId();
 				RadioButton rb = (RadioButton) findViewById(id);
-				String file = getFilesDir().toString().concat("/").concat((String) rb.getText());;
+				String file = getFilesDir().toString().concat("/").concat((String) rb.getText());
 				File toBeLoaded = new File(file);
 				loadEqualizSetting(toBeLoaded);
 			}
@@ -330,11 +449,12 @@ public class MainActivity extends Activity {
 			public void onClick(View v) {
 				int id = group.getCheckedRadioButtonId();
 				RadioButton rb = (RadioButton) findViewById(id);
-				String file = getFilesDir().toString().concat("/").concat((String) rb.getText());;
+				String file = getFilesDir().toString().concat("/").concat((String) rb.getText());
 				File toBeDeleted = new File(file);
-				if(toBeDeleted.delete() == true){
+				deleteFileIsOk(toBeDeleted, rb);
+				/*if(toBeDeleted.delete() == true){
 					group.removeView(rb);
-				}
+				}*/
 			}
 		});
 		
@@ -355,6 +475,39 @@ public class MainActivity extends Activity {
 			}
 		}
 		return inFiles;
+	}
+	
+	private void deleteFileIsOk(File fd, RadioButton rb){
+		final File toBeDeleted = fd;
+		final RadioButton toBeRemoved = rb;
+		
+		AlertDialog.Builder deleteOk = new AlertDialog.Builder(this);
+		deleteOk.setTitle("WARNING: Once a setting is deleted, it cannot be recovered.");
+		deleteOk.setMessage("Are you sure that you want to delete this configuration?");
+		
+		deleteOk.setPositiveButton("Yes", 
+				new DialogInterface.OnClickListener() {
+			
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				if(toBeDeleted.delete() == true){
+					group.removeView(toBeRemoved);
+				}else{
+					Log.println(0, "FileNotFound", "Selected file could not be deleted.");
+				}
+			}
+		});
+		
+		deleteOk.setNegativeButton("Cancel", 
+				new DialogInterface.OnClickListener() {
+			
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				//Do nothing
+			}
+		});
+		
+		deleteOk.show();
 	}
 
 	public void openTutorialPage(View v) {
