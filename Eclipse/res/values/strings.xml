@@ -8,5 +8,7 @@
     <string name="save_page">Saves</string>
     <string name="tutorial_page">Tutorial</string>
     <string name="action_back">ic_action_back</string>
+    <string name="configure_page_name">Configurations Page</string>
+    <string name="saves_page_name">Saves Page</string>
 
 </resources>
