@@ -82,7 +82,9 @@ public class MainActivity extends Activity {
 	}
 
 	public void openConfigPage(View v) {
-		setContentView(mLinearLayout);
+		ScrollView scrollConfig = new ScrollView(this);
+		scrollConfig.addView(mLinearLayout);
+		setContentView(scrollConfig);
 	}
 
 	private void setupEqualizerAndUI() {
