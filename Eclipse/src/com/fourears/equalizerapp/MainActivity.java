@@ -36,6 +36,7 @@ public class MainActivity extends Activity {
 
 	private Equalizer equaliz;
 	private LinearLayout mLinearLayout;
+	private ScrollView scrollConfig;
 	@SuppressWarnings("unused")
 	private File settingsFolder;
 	private SeekBar[] bars;
@@ -43,7 +44,6 @@ public class MainActivity extends Activity {
 	private RadioGroup rGroup;
 	private RadioGroup group;
 	public int id_count;
-	private boolean check_flag = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -51,7 +51,9 @@ public class MainActivity extends Activity {
 		settingsFolder = getDir("FourEars_Settings", Context.MODE_PRIVATE);
 		id_count = 0;
 		mLinearLayout = new LinearLayout(this);
+		scrollConfig = new ScrollView(this);
 		mLinearLayout.setOrientation(LinearLayout.VERTICAL);
+		scrollConfig.addView(mLinearLayout);
 		setupEqualizerAndUI();
 
 		setContentView(R.layout.activity_main);
@@ -82,9 +84,11 @@ public class MainActivity extends Activity {
 	}
 
 	public void openConfigPage(View v) {
-		ScrollView scrollConfig = new ScrollView(this);
-		scrollConfig.addView(mLinearLayout);
-		setContentView(scrollConfig);
+		try{
+			setContentView(scrollConfig);
+		}catch (Exception e){
+			e.printStackTrace();
+		}
 	}
 
 	private void setupEqualizerAndUI() {
@@ -246,7 +250,6 @@ public class MainActivity extends Activity {
 		savePrompt.show();
 	}
 
-	@SuppressWarnings("resource")
 	private void loadEqualizSetting(File file) {
 		String line = null;
 		String[] temp = null;
@@ -263,129 +266,16 @@ public class MainActivity extends Activity {
 				//setProgress activates the seek bar listener, the equation
 				//inside undoes what happens when the listener acts.
 			}
+			fis.close();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch(IOException e){
 			e.printStackTrace();
 		}
-		setContentView(mLinearLayout);
-	}
-
-	/* Grab a name from user and save it to the device */
-	private String promptSaveName() {
-
-		AlertDialog.Builder savePrompt = new AlertDialog.Builder(this);
-		savePrompt.setTitle("Custom Preset Name");
-		savePrompt.setMessage("Enter a name for the new custom preset.");
-
-		// Setup text field for user input
-		final EditText input = new EditText(this);
-		savePrompt.setView(input);
+		openConfigPage(mLinearLayout);
 		
-		// Setup save button on prompt
-		savePrompt.setPositiveButton("Save",
-				new DialogInterface.OnClickListener() {
-
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						check_flag = true;
-					}// End onClick
-				});
-
-		// Do Nothing.
-		savePrompt.setNegativeButton("Cancel",
-				new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						check_flag = false;
-					}
-				});
-
-		savePrompt.show();
-		if (check_flag == false){
-			return "";
-		}else{
-			return input.getText().toString();
-		}
 	}
 	
-	private boolean isOverwriteOk(){
-		AlertDialog.Builder overwriteOk = new AlertDialog.Builder(this);
-		overwriteOk.setTitle("File with that name already exists!");
-		overwriteOk.setMessage("Do you want to overwrite the file?");
-		
-		overwriteOk.setPositiveButton("Yes",
-				new DialogInterface.OnClickListener() {
-
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						check_flag = true;
-					}// End onClick
-				});
-
-		// Do Nothing.
-		overwriteOk.setNegativeButton("Cancel",
-				new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						check_flag = false;
-					}
-				});
-		
-		overwriteOk.show();
-		
-		return check_flag;
-	}
-	
-	private void saveFile(short bands, Equalizer equalizer){
-		List<File> currentListOfFiles = getListFiles(new File(getFilesDir().toString()));
-		boolean save = true;
-		final String saveName = promptSaveName();
-		String FILENAME = saveName;
-		
-		for(File file : currentListOfFiles){
-			Log.d(FILENAME, "In forloop");
-			if(FILENAME.equals(file.getName())){
-				if(isOverwriteOk()){
-					break;
-				}else{
-					save = false;
-					break;
-				}
-			}
-		}
-		//Checks if it's OK to save the file; if it is, then it saves
-		//otherwise it does nothing.
-		if(save){
-			String s = "";
-			// Define a string object to store equalizer band settings that is
-			// separated by new line characters
-			for (short i = 0; i < bands; i++) {
-				final short band = i;
-				final short bLevel = equalizer.getBandLevel(band);
-				String newLine = System.getProperty("line.separator");
-				s = s.concat(String.valueOf(bLevel)).concat(" ")
-						.concat(String.valueOf(band).concat(newLine));
-			}
-
-			final String settings = s; // Creates a string object that can be saved.
-			
-			try {
-				File saveFile = new File(getFilesDir(), FILENAME);
-				FileOutputStream fos = new FileOutputStream(
-						saveFile);
-				fos.write(settings.getBytes());
-				fos.close();
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}//End if-statement
-	}
-
 	public void openSavePage(View v) {
 		ScrollView scrollSaves = new ScrollView(this); //Allows for scrolling
 		LinearLayout savesLayout = new LinearLayout(this);
@@ -398,7 +288,6 @@ public class MainActivity extends Activity {
 	private void setupSavesPage(LinearLayout saves) {
 		//Sets up the saves page by finding every single file returned by 
 		//the getFilesDir() function
-		
 		LinearLayout row = new LinearLayout(this);
 		row.setOrientation(LinearLayout.HORIZONTAL);
 		
